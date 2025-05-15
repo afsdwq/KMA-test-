@@ -1,0 +1,5 @@
+C:\Users\swoom\source\repos\기상청DLL\Region\obj\Debug\netstandard2.0\Region.csproj.AssemblyReference.cache
+C:\Users\swoom\source\repos\기상청DLL\Region\obj\Debug\netstandard2.0\Region.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\swoom\source\repos\기상청DLL\Region\obj\Debug\netstandard2.0\Region.AssemblyInfoInputs.cache
+C:\Users\swoom\source\repos\기상청DLL\Region\obj\Debug\netstandard2.0\Region.AssemblyInfo.cs
+C:\Users\swoom\source\repos\기상청DLL\Region\obj\Debug\netstandard2.0\Region.csproj.CoreCompileInputs.cache
