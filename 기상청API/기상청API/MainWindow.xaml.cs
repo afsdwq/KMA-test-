@@ -1,72 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
-using 기상청DLL; // 만든 DLL 네임스페이스를 참조
+using 기상청DLL;
 
 namespace 기상날씨앱
 {
     public partial class MainWindow : Window
     {
-        // DLL에서 제공하는 App 클래스의 인스턴스를 생성
         private Class1.App weatherApp = new Class1.App();
+
         public MainWindow()
         {
-            InitializeComponent(); // WPF UI 초기화\
+            InitializeComponent();
         }
 
-
-        // "날씨 조회" 버튼 클릭 이벤트 핸들러
         private async void GetWeather_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-
-                // 아무 것도 선택하지 않았을 경우 경고 메시지 출력
                 if (!int.TryParse(TextBox1.Text.Trim(), out int x))
                 {
-                    MessageBox.Show("x 좌표를 숫자로 입력하세요.");
+                    MessageBox.Show("X 좌표를 숫자로 입력하세요.");
                     return;
                 }
 
                 if (!int.TryParse(TextBox2.Text.Trim(), out int y))
                 {
-                    MessageBox.Show("y 좌표를 숫자로 입력하세요.");
+                    MessageBox.Show("Y 좌표를 숫자로 입력하세요.");
                     return;
                 }
-                string targetDate = "20250515";
-                string baseTime = "0730";
 
-                // DLL의 GetWeatherAsync 메서드를 비동기로 호출하여 날씨 데이터 가져오기
-                List<Class1.list> weatherData = await weatherApp.GetWeatherAsync(x, y, targetDate, baseTime);
-
-       
-
-                // 현재 시각을 "HH00" 형식으로 가져오기 (예: "14:00", "15:00")
-                string currentTime = DateTime.Now.ToString("HHmm");
-
-
-                // 문자열 정리 없이 원본 fcstTimeRaw를 기준으로 비교
-                // 내가 보고 싶은 예보 시각
-                string targetFcstTime = "0800";
-                var filtered = weatherData.FirstOrDefault(w => w.fcstTimeRaw == targetFcstTime);
-
-                if (filtered == null)
+                string targetFcstTime = TextBoxFcstTime.Text.Trim();
+                if (string.IsNullOrEmpty(targetFcstTime))
                 {
-                    MessageBox.Show($"예보 시각({targetFcstTime})에 대한 데이터가 없습니다.");
+                    targetFcstTime = DateTime.Now.ToString("HH00");  // 기본값 예: 1400
+                }
+
+                var weatherData = await weatherApp.GetWeatherAsync(x, y);
+
+                var data = weatherData.FirstOrDefault(w => w.fcstTimeRaw == targetFcstTime);
+
+                if (data == null)
+                {
+                    TextBlockWeather.Text = $"예보 시간({targetFcstTime})에 대한 데이터가 없습니다.";
                     return;
                 }
 
-                weatherListView.ItemsSource = new List<Class1.list> { filtered };
+                // PTY 와 SKY를 같이 표시 (PTY가 있으면 PTY, 없으면 SKY)
+                string skyOrPty = string.IsNullOrEmpty(data.PTY) || data.PTY == "없음" ? data.SKY : data.PTY;
 
+                string output = $"지역: {data.RegionName}\n" +
+                                $"예보 시간: {data.fcstTime}\n" +
+                                $"기온: {data.T1H}\n" +
+                                $"습도: {data.REH}\n" +
+                                $"강수형태/하늘: {skyOrPty}";
 
-                // ListView에 바인딩 (가장 가까운 시간의 데이터)
-                //weatherListView.ItemsSource = new List<Class1.list> { filtered.Weather };
-            } catch (Exception ex) {
-                MessageBox.Show("오류" + ex.Message);
+                TextBlockWeather.Text = output;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("오류: " + ex.Message);
             }
         }
-    } 
+    }
 }
